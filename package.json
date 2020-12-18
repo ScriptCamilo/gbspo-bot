@@ -1,0 +1,14 @@
+{
+  "name": "gbspo_bot",
+  "version": "1.0.0",
+  "description": "Bot to reminder my girlfriend to take her pills",
+  "main": "app.js",
+  "author": "Rodrigo Camilo",
+  "license": "MIT",
+  "scripts": {
+    "start": "node ./src/app.js"
+  },
+  "dependencies": {
+    "telegraf": "^3.38.0"
+  }
+}
