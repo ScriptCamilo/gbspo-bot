@@ -11,9 +11,9 @@ let pillScheduleOn = false;
 let cautionScheduleOn = false;
 // Ao mesmo tempo que também quero fazer um outro comando dá a condição de parada do caution schedule 
 
-// CRIAR FUNÇÃO PARA OS SCHEDULES E DEIXAR O CÓDIGO MAIS LIMPO!!!!
-function createSchedule() {
-  const pillSchedule = schedule.scheduleJob('0 */5 * * * *', () => {
+// Função para criar os schedules que o bot irá mandar mensagens
+function createSchedule(ctx) {
+  const pillSchedule = schedule.scheduleJob('0 0 21 * * *', () => {
     // Estou eviando um sticker diretamente para um chat específico
     ctx.telegram.sendDocument(process.env.OWNER_ID, {
       source: fs.readFileSync('./assets/stickers-bot/pill.webp'),
@@ -23,7 +23,7 @@ function createSchedule() {
     // Criando um schedule para continuar alertando ao usuário caso ainda não tenha tomado o remédio
     let count = 0; // Para poder alternar entre o nível de caution para o usuário
     cautionScheduleOn = true;
-    const cautionSchedule = schedule.scheduleJob('0 */1 * * * *', () => {
+    const cautionSchedule = schedule.scheduleJob('0 */30 * * * *', () => {
       // Condição de parada para o schedule continuar avisando ao usuário
       if (!cautionScheduleOn) {
         console.log("Cancelado.");
@@ -45,6 +45,11 @@ function createSchedule() {
   })
 }
 
+// A message that will be sent everytime the server restart with a possible update
+function botUpdate() {
+  bot.telegram.sendMessage(process.env.OWNER_ID, `We have been updated, can you please use the start command again?`)
+}
+
 // Erro caso não seja a pessoa certa acessando o BOT
 bot.catch((err, ctx) => {
   console.log(`Ooops, encoutered an error for ${ctx.updateType}`, err);
@@ -54,9 +59,10 @@ bot.catch((err, ctx) => {
   })
 })
 
+botUpdate()
 // O start está presente em todos os BOTS, mas nesse também filtramos se o ID corresponde ao da pessoa certa
 bot.start((ctx) => {
-  if (ctx.chat.id !== Number(process.env.OWNER_ID)) {
+  if (ctx.chat.id !== Number(process.env.OWNER_ID) && ctx.chat.id !== Number(process.env.ADMIN_ID)) {
     throw new Error('Authentication error');
   }
   ctx.replyWithDocument({
@@ -68,7 +74,7 @@ bot.start((ctx) => {
   // Estou evitando também que vários comandos start crie vários schedules
   if (!pillScheduleOn) {
     pillScheduleOn = true;
-    createSchedule()
+    createSchedule(ctx)
   }
 })
 
@@ -77,10 +83,16 @@ bot.command('tomei', (ctx, next) => {
   if (ctx.chat.id !== Number(process.env.OWNER_ID)) {
     throw new Error('Authentication error');
   }
+  // Here we are canceling the caution schedule
   cautionScheduleOn = false;
+
   ctx.replyWithDocument({
     source: fs.readFileSync('./assets/stickers-bot/baby.webp'),
     filename: 'baby.webp'
+  })
+  ctx.telegram.sendDocument(process.env.ADMIN_ID, {
+    source: fs.readFileSync('assets/stickers-bot/master.webp'),
+    filename: 'master.webp'
   })
 })
 
