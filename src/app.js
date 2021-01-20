@@ -4,7 +4,12 @@ const { Telegraf } = require("telegraf");
 const fs = require('fs');
 const schedule = require("node-schedule");
 
+const PORT = process.env.PORT || 3000;
+const URL = process.env.URL || "https://gbspo-bot.herokuapp.com";
+
 const bot = new Telegraf(process.env.BOT_TOKEN);
+bot.telegram.setWebhook(`${URL}/bot${process.env.BOT_TOKEN}`);
+bot.startWebhook(`/bot${process.env.BOT_TOKEN}`, null, PORT);
 
 // Condição para o schedule ser criado ou não, evitando repetição caso haja mais de um comando start bem sucedido
 let pillScheduleOn = false;
@@ -13,7 +18,7 @@ let cautionScheduleOn = false;
 
 // Função para criar os schedules que o bot irá mandar mensagens
 function createSchedule(ctx) {
-  const pillSchedule = schedule.scheduleJob('0 0 21 * * *', () => {
+  const pillSchedule = schedule.scheduleJob('0 0 0 * * *', () => {
     // Estou eviando um sticker diretamente para um chat específico
     ctx.telegram.sendDocument(process.env.OWNER_ID, {
       source: fs.readFileSync('./assets/stickers-bot/pill.webp'),
@@ -98,5 +103,5 @@ bot.command('tomei', (ctx, next) => {
 
 bot.launch();
 
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+// process.once('SIGINT', () => bot.stop('SIGINT'));
+// process.once('SIGTERM', () => bot.stop('SIGTERM'));
