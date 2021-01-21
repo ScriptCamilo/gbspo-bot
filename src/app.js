@@ -4,12 +4,7 @@ const { Telegraf } = require("telegraf");
 const fs = require('fs');
 const schedule = require("node-schedule");
 
-const PORT = process.env.PORT || 3000;
-const URL = process.env.URL || "https://gbspo-bot.herokuapp.com";
-
 const bot = new Telegraf(process.env.BOT_TOKEN);
-bot.telegram.setWebhook(`${URL}/bot${process.env.BOT_TOKEN}`);
-bot.startWebhook(`/bot${process.env.BOT_TOKEN}`, null, PORT);
 
 // Condição para o schedule ser criado ou não, evitando repetição caso haja mais de um comando start bem sucedido
 let pillScheduleOn = false;
