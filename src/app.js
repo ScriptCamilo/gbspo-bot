@@ -5,7 +5,7 @@ const fs = require('fs');
 const schedule = require("node-schedule");
 
 const PORT = process.env.PORT || 3000;
-const URL = process.env.URL || "https://gbspo-bot.vercel.app/";
+const URL = process.env.URL || "https://gbspo-bot.herokuapp.com";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.telegram.setWebhook(`${URL}/bot${process.env.BOT_TOKEN}`);
