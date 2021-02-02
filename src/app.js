@@ -4,24 +4,27 @@ const { Telegraf } = require("telegraf");
 const fs = require('fs');
 const schedule = require("node-schedule");
 
-const PORT = process.env.PORT || 3000;
-const URL = process.env.URL || "https://gbspo-bot.herokuapp.com";
+// Vamos fazer teste e remover para ver se evita crash
+// const PORT = process.env.PORT || 3000;
+// const URL = process.env.URL || "https://gbspo-bot.herokuapp.com";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-bot.telegram.setWebhook(`${URL}/bot${process.env.BOT_TOKEN}`);
-bot.startWebhook(`/bot${process.env.BOT_TOKEN}`, null, PORT)
+
+// bot.telegram.setWebhook(`${URL}/bot${process.env.BOT_TOKEN}`);
+// bot.startWebhook(`/bot${process.env.BOT_TOKEN}`, null, PORT)
 
 // Condição para o schedule ser criado ou não, evitando repetição caso haja mais de um comando start bem sucedido
 let pillScheduleOn = false;
 let cautionScheduleOn = false;
-// Ao mesmo tempo que também quero fazer um outro comando dá a condição de parada do caution schedule 
+// Ao mesmo tempo que também quero fazer um outro comando dando a condição de parada do caution schedule 
 
-// Função para criar os schedules que o bot irá mandar mensagens
+// Função para criar os schedules para que o bot mande as mensagens
 function createSchedule(ctx) {
+  // O horário do heroku é do US, logo estou pondo para meia-noite mas o horário que eu quero é 21h00
   const pillSchedule = schedule.scheduleJob('0 0 0 * * *', () => {
     // Estou eviando um sticker diretamente para um chat específico
     ctx.telegram.sendDocument(process.env.OWNER_ID, {
-      source: fs.readFileSync('./assets/stickers-bot/pill.webp'),
+      source: fs.readFileSync('./assets/stickers/pill.webp'),
       filename: 'pill.webp'
     })
     
@@ -37,12 +40,12 @@ function createSchedule(ctx) {
       // Processo entre a troca de níveis para o caution
       if (count++ < 3) {
         ctx.telegram.sendDocument(process.env.OWNER_ID, {
-          source: fs.readFileSync('./assets/stickers-bot/alert.webp'),
+          source: fs.readFileSync('./assets/stickers/alert.webp'),
           filename: 'alert.webp'
         })
       } else {
         ctx.telegram.sendDocument(process.env.OWNER_ID, {
-          source: fs.readFileSync('./assets/stickers-bot/danger.webp'),
+          source: fs.readFileSync('./assets/stickers/danger.webp'),
           filename: 'danger.webp'
         })
       }
@@ -52,14 +55,18 @@ function createSchedule(ctx) {
 
 // A message that will be sent everytime the server restart with a possible update
 function botUpdate() {
-  bot.telegram.sendMessage(process.env.OWNER_ID, `We have been updated, can you please use the start command again?`)
+  bot.telegram.sendDocument(process.env.ADMIN_ID, {
+  // bot.telegram.sendDocument(process.env.OWNER_ID, {
+    source: fs.readFileSync('./assets/stickers/update.webp'),
+    filename: 'update.webp'
+  })
 }
 
 // Erro caso não seja a pessoa certa acessando o BOT
 bot.catch((err, ctx) => {
   console.log(`Ooops, encoutered an error for ${ctx.updateType}`, err);
   ctx.replyWithDocument({
-    source: fs.readFileSync('./assets/stickers-bot/denied.webp'),
+    source: fs.readFileSync('./assets/stickers/denied.webp'),
     filename: 'denied.webp'
   })
 })
@@ -71,7 +78,7 @@ bot.start((ctx) => {
     throw new Error('Authentication error');
   }
   ctx.replyWithDocument({
-    source: fs.readFileSync('./assets/stickers-bot/granted.webp'),
+    source: fs.readFileSync('./assets/stickers/granted.webp'),
     filename: 'granted.webp'
   })
   
@@ -92,11 +99,11 @@ bot.command('tomei', (ctx, next) => {
   cautionScheduleOn = false;
 
   ctx.replyWithDocument({
-    source: fs.readFileSync('./assets/stickers-bot/baby.webp'),
+    source: fs.readFileSync('./assets/stickers/baby.webp'),
     filename: 'baby.webp'
   })
   ctx.telegram.sendDocument(process.env.ADMIN_ID, {
-    source: fs.readFileSync('assets/stickers-bot/master.webp'),
+    source: fs.readFileSync('assets/stickers/master.webp'),
     filename: 'master.webp'
   })
 })
