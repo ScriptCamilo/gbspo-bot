@@ -824,6 +824,11 @@ telegraf@^3.38.0:
     sandwich-stream "^2.0.1"
     telegram-typings "^3.6.0"
 
+telegram-keyboard@^2.2.5:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/telegram-keyboard/-/telegram-keyboard-2.2.5.tgz#3d41756ea8fb2d74d738c669ee6568702eb394bc"
+  integrity sha512-ecuDZVkwaphlpAYGydioeTyYznhsgjSinS9plnXgYXgLDehNhQqTqToUIn5N6tpDT1Jn/6WieFtMKlgY9HynmA==
+
 telegram-typings@^3.6.0:
   version "3.6.1"
   resolved "https://registry.yarnpkg.com/telegram-typings/-/telegram-typings-3.6.1.tgz#1288d547f8694b61f1c01c2993e295f3114d9e25"

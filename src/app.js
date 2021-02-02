@@ -1,17 +1,25 @@
+// PRECISO CORRIGIR O SEGUINTE ERROR: DeprecationWarning: Unhandled promise rejections are deprecated. 
+// In the future, promise rejections that are not handled will terminate the Node.js process with a non-zero exit code.
+
 require('dotenv').config();
 
 const { Telegraf } = require("telegraf");
+const { Keyboard, Key } = require('telegram-keyboard');
 const fs = require('fs');
 const schedule = require("node-schedule");
 
-// Vamos fazer teste e remover para ver se evita crash
-// const PORT = process.env.PORT || 3000;
-// const URL = process.env.URL || "https://gbspo-bot.herokuapp.com";
+
+const PORT = process.env.PORT || 3000;
+const URL = process.env.URL || "https://gbspo-bot.herokuapp.com";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
+// Creating a keyboard button
+const keyboard = Keyboard.make([
+  [Key.callback('START', '/start')]
+])
 
-// bot.telegram.setWebhook(`${URL}/bot${process.env.BOT_TOKEN}`);
-// bot.startWebhook(`/bot${process.env.BOT_TOKEN}`, null, PORT)
+bot.telegram.setWebhook(`${URL}/bot${process.env.BOT_TOKEN}`);
+bot.startWebhook(`/bot${process.env.BOT_TOKEN}`, null, PORT);
 
 // Condição para o schedule ser criado ou não, evitando repetição caso haja mais de um comando start bem sucedido
 let pillScheduleOn = false;
@@ -53,13 +61,28 @@ function createSchedule(ctx) {
   })
 }
 
+function createStart(ctx) {
+  ctx.replyWithDocument({
+    source: fs.readFileSync('./assets/stickers/granted.webp'),
+    filename: 'granted.webp'
+  })
+  
+  // A partir do comando start o bot criará um schedule de mensagens que se repetirá em um horário específico
+  // Estou evitando também que vários comandos start crie vários schedules
+  if (!pillScheduleOn) {
+    pillScheduleOn = true;
+    createSchedule(ctx)
+  }
+}
+
 // A message that will be sent everytime the server restart with a possible update
-function botUpdate() {
-  bot.telegram.sendDocument(process.env.ADMIN_ID, {
-  // bot.telegram.sendDocument(process.env.OWNER_ID, {
+async function botUpdate() {
+  // await bot.telegram.sendDocument(process.env.ADMIN_ID, {
+  bot.telegram.sendDocument(process.env.OWNER_ID, {
     source: fs.readFileSync('./assets/stickers/update.webp'),
     filename: 'update.webp'
-  })
+  }, keyboard.inline())
+  // Putting the keyboard button in my update message
 }
 
 // Erro caso não seja a pessoa certa acessando o BOT
@@ -72,22 +95,22 @@ bot.catch((err, ctx) => {
 })
 
 botUpdate()
+
+bot.on('callback_query', async (ctx) => {
+  if (ctx.chat.id !== Number(process.env.OWNER_ID) && ctx.chat.id !== Number(process.env.ADMIN_ID)) {
+    throw new Error('Authentication error');
+  }
+  if (ctx.callbackQuery.data === '/start') {
+    createStart(ctx)
+  }
+})
+
 // O start está presente em todos os BOTS, mas nesse também filtramos se o ID corresponde ao da pessoa certa
 bot.start((ctx) => {
   if (ctx.chat.id !== Number(process.env.OWNER_ID) && ctx.chat.id !== Number(process.env.ADMIN_ID)) {
     throw new Error('Authentication error');
   }
-  ctx.replyWithDocument({
-    source: fs.readFileSync('./assets/stickers/granted.webp'),
-    filename: 'granted.webp'
-  })
-  
-  // A partir do comando start o bot criará um schedule de mensagens que se repetirá em um horário específico
-  // Estou evitando também que vários comandos start crie vários schedules
-  if (!pillScheduleOn) {
-    pillScheduleOn = true;
-    createSchedule(ctx)
-  }
+  createStart(ctx)
 })
 
 // Command para quando ela tiver tomado o remédio avisar ao BOT e condição de parada para o caution schedule
