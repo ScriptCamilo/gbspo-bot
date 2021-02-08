@@ -1,1 +1,1 @@
-**It will be soon avaible**
+**It will be availble soon**
