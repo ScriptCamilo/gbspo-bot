@@ -14,7 +14,7 @@ const URL = process.env.URL || "https://gbspo-bot.herokuapp.com";
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 // Creating a keyboard button
-const keyboard = Keyboard.make([
+const startKey = Keyboard.make([
   [Key.callback('START', '/start')]
 ])
 
@@ -81,7 +81,7 @@ async function botUpdate() {
   bot.telegram.sendDocument(process.env.OWNER_ID, {
     source: fs.readFileSync('./assets/stickers/update.webp'),
     filename: 'update.webp'
-  }, keyboard.inline())
+  }, startKey.inline())
   // Putting the keyboard button in my update message
 }
 
@@ -94,7 +94,7 @@ bot.catch((err, ctx) => {
   })
 })
 
-botUpdate()
+// botUpdate()
 
 bot.on('callback_query', async (ctx) => {
   if (ctx.chat.id !== Number(process.env.OWNER_ID) && ctx.chat.id !== Number(process.env.ADMIN_ID)) {
