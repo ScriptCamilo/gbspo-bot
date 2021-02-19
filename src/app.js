@@ -28,6 +28,7 @@ let cautionScheduleOn = false;
 
 // Função para criar os schedules para que o bot mande as mensagens
 function createSchedule(ctx) {
+  pillScheduleOn = true;
   // O horário do heroku é do US, logo estou pondo para meia-noite mas o horário que eu quero é 21h00
   const pillSchedule = schedule.scheduleJob('0 0 0 * * *', () => {
     // Estou eviando um sticker diretamente para um chat específico
@@ -70,7 +71,6 @@ function createStart(ctx) {
   // A partir do comando start o bot criará um schedule de mensagens que se repetirá em um horário específico
   // Estou evitando também que vários comandos start crie vários schedules
   if (!pillScheduleOn) {
-    pillScheduleOn = true;
     createSchedule(ctx)
   }
 }
@@ -95,7 +95,7 @@ bot.catch((err, ctx) => {
 })
 
 // botUpdate()
-createStart(bot.telegram)
+createSchedule(bot.telegram)
 
 bot.on('callback_query', async (ctx) => {
   if (ctx.chat.id !== Number(process.env.OWNER_ID) && ctx.chat.id !== Number(process.env.ADMIN_ID)) {
