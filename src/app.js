@@ -95,6 +95,7 @@ bot.catch((err, ctx) => {
 })
 
 // botUpdate()
+createStart(bot.telegram)
 
 bot.on('callback_query', async (ctx) => {
   if (ctx.chat.id !== Number(process.env.OWNER_ID) && ctx.chat.id !== Number(process.env.ADMIN_ID)) {
